@@ -1,24 +1,30 @@
 from django.http import HttpResponseNotAllowed
-from django.views.generic import View
 from django.contrib.auth import authenticate, login
-from django.http.response import HttpResponse, HttpResponseForbidden
+from knox.views import LoginView as KnoxLoginView
+from rest_framework import permissions
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.status import HTTP_403_FORBIDDEN
 
 
-class LoginView(View):
-    def post(self, request):
+class LoginView(KnoxLoginView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, format=None):
         username = request.POST["username"]
         password = request.POST["password"]
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return HttpResponse()
+            return super().post(request, format=format)
         else:
-            return HttpResponseForbidden(b"Invalid username or password.")
+            return Response("Invalid username or password.", status=HTTP_403_FORBIDDEN)
 
-class WhoAmI(View):
+
+class WhoAmI(APIView):
     def get(self, request):
         if request.user.is_authenticated:
-            return HttpResponse(request.user.username)
+            return Response(request.user.username)
         else:
-            return HttpResponseForbidden()
+            return Response(status=HTTP_403_FORBIDDEN)
