@@ -1,10 +1,9 @@
-from django.http import HttpResponseNotAllowed
 from django.contrib.auth import authenticate, login
 from knox.views import LoginView as KnoxLoginView
 from rest_framework import permissions
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_403_FORBIDDEN
+from rest_framework.views import APIView
 
 
 class LoginView(KnoxLoginView):

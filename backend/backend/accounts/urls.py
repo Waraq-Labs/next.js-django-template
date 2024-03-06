@@ -1,7 +1,7 @@
 from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
-from .views import LoginView, WhoAmI
 
+from .views import LoginView, WhoAmI
 
 urlpatterns = [
     path("auth/", include("knox.urls")),
