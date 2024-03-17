@@ -3,13 +3,19 @@
 import {BACKEND_URL} from '@/constants';
 import {useRouter} from 'next/navigation';
 import {useIsClient} from '@uidotdev/usehooks';
-import {useState} from 'react';
 import {useAuthTokenData} from '@/lib/authentication';
+import {useForm} from 'react-hook-form';
+import {z} from 'zod';
+import {zodResolver} from '@hookform/resolvers/zod';
 
-async function signIn(loginData, router, setToken) {
+async function signIn(loginData, setToken) {
+  const formDataForSubmission = new FormData();
+  formDataForSubmission.append('email', loginData.email);
+  formDataForSubmission.append('password', loginData.password);
+
   const response = await fetch(`${BACKEND_URL}/accounts/login/`, {
     method: 'POST',
-    body: loginData,
+    body: formDataForSubmission,
   });
 
   const responseData = await response.json();
@@ -26,39 +32,55 @@ async function signIn(loginData, router, setToken) {
 function LoginForm() {
   const router = useRouter();
   const [_, setToken] = useAuthTokenData();
-  const [error, setError] = useState(null);
+
+  const schema = z.object({
+    email: z.string({
+      required_error: 'Email is required.',
+    }).email(),
+    password: z.string({
+      required_error: 'Password is required.',
+    }).trim().min(1, {message: "Password is required."}),
+  });
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: {errors},
+  } = useForm({
+    resolver: zodResolver(schema)
+  });
 
   return <form
-      onSubmit={async (event) => {
-        event.preventDefault();
-
-        setError(null);
-
-        const signInResult = await signIn(
-            new FormData(event.target), router, setToken,
-        );
-
-        if (signInResult) {
-          setError(signInResult);
-        } else {
+      onSubmit={handleSubmit(async (data) => {
+        const signInResponse = await signIn(data, setToken);
+        if (signInResponse === null) {
           router.push('/');
+        } else {
+          setError('root.error', {type: 'custom', message: signInResponse});
         }
-      }}>
+      })}>
 
     <h2 className="text-2xl mb-6 text-center">Login</h2>
 
+    {errors.root?.error && <div className="mb-2 text-red-600">
+      {errors.root.error.message}
+    </div>}
+
     <div className="mb-4">
-      <label htmlFor="username" className="block font-light mb-1">Email
+      <label htmlFor="email" className="block font-light mb-1">Email
         address</label>
-      <input id="username" name="username"
+      <input {...register('email', {required: true})}
              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:ring-1"/>
+      {errors.email && <span className="text-red-600">{errors.email.message}</span>}
     </div>
 
     <div className="mb-4">
       <label htmlFor="password"
              className="block font-light mb-2">Password</label>
-      <input type="password" id="password" name="password"
+      <input type="password" {...register('password', {required: true})}
              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:ring-1"/>
+      {errors.password && <span className="text-red-600">{errors.password.message}</span>}
     </div>
 
     <div className="flex items-center mb-6">
@@ -67,13 +89,6 @@ function LoginForm() {
       <a href="#" className="text-sm text-blue-500 ml-auto">Forgot
         password?</a>
     </div>
-
-    {error && <div className="mb-4">
-      <div id="error-message"
-           className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-        {error}
-      </div>
-    </div>}
 
     <button
         className="w-full bg-blue-500 text-white py-2 px-4 mb-2 rounded-md hover:bg-blue-600 transition duration-300">

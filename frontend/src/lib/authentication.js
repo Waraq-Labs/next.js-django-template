@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocalStorage } from "@uidotdev/usehooks";
+import {useLocalStorage} from '@uidotdev/usehooks';
 
 export function getTokenIfValid(tokenData) {
   if (tokenData !== null) {
@@ -16,6 +16,6 @@ export function getTokenIfValid(tokenData) {
 export function useAuthTokenData() {
   return useLocalStorage(
       'tokenData',
-      null
+      null,
   );
 }

@@ -10,7 +10,7 @@ class LoginView(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, format=None):
-        username = request.POST["username"]
+        username = request.POST["email"]
         password = request.POST["password"]
 
         user = authenticate(request, username=username, password=password)

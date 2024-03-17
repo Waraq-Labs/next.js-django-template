@@ -19,7 +19,7 @@ function WhoAmI() {
           headers: {
             Authorization: `Token ${token}`,
           },
-        })
+        });
 
         if (response.ok) {
           const responseData = await response.json();
@@ -40,7 +40,8 @@ export default function Home() {
   return (
       <main className="flex min-h-dvh w-full flex-col justify-around">
         <h1 className="text-center text-4xl">Home</h1>
-        <ClientOnlyWrapper fallback={<div className="text-center">Loading...</div>}>
+        <ClientOnlyWrapper
+            fallback={<div className="text-center">Loading...</div>}>
           <WhoAmI/>
         </ClientOnlyWrapper>
       </main>
