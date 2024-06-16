@@ -7,6 +7,7 @@ import {useAuthTokenData} from '@/lib/authentication';
 import {useForm} from 'react-hook-form';
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
+import Link from 'next/link';
 
 async function signIn(loginData, setToken) {
   const formDataForSubmission = new FormData();
@@ -34,12 +35,8 @@ function LoginForm() {
   const [_, setToken] = useAuthTokenData();
 
   const schema = z.object({
-    email: z.string({
-      required_error: 'Email is required.',
-    }).email(),
-    password: z.string({
-      required_error: 'Password is required.',
-    }).trim().min(1, {message: "Password is required."}),
+    email: z.string().min(1, {message: "Email is required."}).email(),
+    password: z.string().trim().min(1, {message: "Password is required."}),
   });
 
   const {
@@ -94,10 +91,11 @@ function LoginForm() {
         className="w-full bg-blue-500 text-white py-2 px-4 mb-2 rounded-md hover:bg-blue-600 transition duration-300">
       Sign in
     </button>
-    <button
-        className="w-full bg-gray-200 py-2 px-4 rounded-md hover:bg-gray-300 transition duration-300">
+    <Link
+        href="/register"
+        className="block text-center w-full bg-gray-200 py-2 px-4 rounded-md hover:bg-gray-300 transition duration-300">
       Create a new account
-    </button>
+    </Link>
 
   </form>;
 }
